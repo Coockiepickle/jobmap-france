@@ -180,6 +180,9 @@ export default function Home() {
               );
             })}
           </div>
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+            Compteurs = offres cartographiées, plafonnées par le volume max.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -379,11 +382,11 @@ export default function Home() {
                     {jobs.length}
                   </span>
                   <span className="text-muted-foreground">
-                    offres affichées{" "}
+                    offres cartographiées{" "}
                     {meta && meta.total > jobs.length && (
                       <>
-                        sur <span className="font-mono tabular-nums">{meta.total.toLocaleString("fr-FR")}</span>{" "}
-                        disponibles
+                        · <span className="font-mono tabular-nums">{meta.total.toLocaleString("fr-FR")}</span>{" "}
+                        correspondent aux filtres
                       </>
                     )}
                   </span>
@@ -399,7 +402,9 @@ export default function Home() {
 
           {/* Legend */}
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] hidden rounded-lg border border-border bg-card/95 p-3 text-xs shadow-sm backdrop-blur sm:block">
-            <p className="mb-2 font-semibold uppercase tracking-wider text-muted-foreground">Légende</p>
+            <p className="mb-2 font-semibold uppercase tracking-wider text-muted-foreground">
+              Offres cartographiées
+            </p>
             <ul className="space-y-1.5">
               {CONTRACT_GROUPS.map((g) => (
                 <li key={g.id} className="flex items-center gap-2">
