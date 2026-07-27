@@ -7,8 +7,8 @@
  * Generation is deterministic (seeded PRNG) so reloads are stable.
  */
 
-import type { RawOffer, SearchCriteria } from "./francetravail";
-import { DEPARTMENTS, departmentsOfRegion } from "./geo";
+import type { RawOffer, SearchCriteria } from "./francetravail.js";
+import { DEPARTMENTS, departmentsOfRegion } from "./geo.js";
 
 interface City {
   name: string;

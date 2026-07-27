@@ -20,7 +20,7 @@
  */
 
 import type { ContractGroup, Job } from "@shared/types";
-import { departmentFromLabel, getDepartment } from "./geo";
+import { departmentFromLabel, getDepartment } from "./geo.js";
 
 const TOKEN_URL =
   "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire";

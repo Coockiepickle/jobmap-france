@@ -2,7 +2,7 @@ import type { Express, Request } from "express";
 import type { Server } from "node:http";
 import { z } from "zod";
 import type { ApiStatus, ContractGroup, Job, JobsResponse } from "@shared/types";
-import { DEPARTMENTS, REGIONS, departmentsOfRegion } from "./geo";
+import { DEPARTMENTS, REGIONS, departmentsOfRegion } from "./geo.js";
 import {
   SCOPE,
   criteriaForGroup,
@@ -10,8 +10,8 @@ import {
   normalizeOffer,
   searchOffers,
   type SearchCriteria,
-} from "./francetravail";
-import { searchDemoOffers } from "./demo";
+} from "./francetravail.js";
+import { searchDemoOffers } from "./demo.js";
 
 const listParam = (value: unknown): string[] =>
   String(value ?? "")
