@@ -116,7 +116,22 @@ client/src/components/job-map.tsx    Leaflet map, cluster icons, marker selectio
 client/src/components/job-detail.tsx detail panel
 ```
 
-## 5. Running
+## 5. Deploying to Vercel
+
+The project deploys as a static client (`dist/public`) plus a single serverless function that mounts the same Express routes:
+
+- `vercel.json` sets `buildCommand: npm run build` and `outputDirectory: dist/public`.
+- `api/[...all].ts` is a catch-all Vercel Function that lazily calls `registerRoutes()` from `server/routes.ts` and forwards every `/api/*` request into it.
+- Add `FT_CLIENT_ID` / `FT_CLIENT_SECRET` as Environment Variables in the Vercel project settings to switch it out of demo mode in production.
+
+```bash
+npx vercel link
+npx vercel deploy --prod
+```
+
+Note: because the root `package.json` has `"type": "module"`, Node's native ESM loader (used by Vercel Functions, unlike Vite's bundler resolution) requires explicit `.js` extensions on relative imports — that's why `server/*.ts` and `api/[...all].ts` import siblings as `"./geo.js"`, `"./francetravail.js"`, etc. even though the source files are `.ts`.
+
+## 6. Running
 
 ```bash
 npm install
