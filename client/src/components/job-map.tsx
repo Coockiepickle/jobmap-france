@@ -70,9 +70,14 @@ export default function JobMap({ jobs, selectedId, onSelect, dark, fitKey }: Pro
   const selectRef = useRef(onSelect);
   selectRef.current = onSelect;
 
+  // CARTO basemaps now require a free API key (see https://carto.com/basemaps/apikey/).
+  // Set VITE_CARTO_API_KEY in the environment (locally in .env, on Vercel as a Project env var)
+  // to remove the "API key required" watermark. The map still works without it.
+  const cartoKey = import.meta.env.VITE_CARTO_API_KEY as string | undefined;
+  const keyParam = cartoKey ? `?key=${encodeURIComponent(cartoKey)}` : "";
   const tileUrl = dark
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+    ? `https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png${keyParam}`
+    : `https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png${keyParam}`;
 
   // Init once
   useEffect(() => {
