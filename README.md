@@ -21,6 +21,19 @@ FT_CLIENT_SECRET=your_secret
 
 Restart the server. The header badge switches from `Jeu de démonstration` to `API France Travail`, and `GET /api/status` reports `mode: "france-travail"`.
 
+## 1bis. CARTO basemap API key
+
+CARTO's raster basemap tiles (`basemaps.cartocdn.com`) now require a free API key — without it the map still works but every tile shows an "API key required" watermark.
+
+1. Request a free key at [carto.com/basemaps/apikey](https://carto.com/basemaps/apikey/) (instant, no approval queue, no CARTO account needed, free up to 5M tile requests/month).
+2. Add it to `.env` (must keep the `VITE_` prefix so Vite exposes it to the browser bundle):
+
+```bash
+VITE_CARTO_API_KEY=your_carto_key
+```
+
+3. On Vercel, add `VITE_CARTO_API_KEY` as a Project Environment Variable (Production + Preview) and redeploy — Vite bakes it into the build at build time, so a redeploy is required after adding or changing it.
+
 ## 2. API integration (server/francetravail.ts)
 
 ### OAuth2 (client credentials)
