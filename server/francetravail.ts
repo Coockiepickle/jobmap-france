@@ -14,8 +14,8 @@
  *  - `range` window is 150 offers max per call, first index <= 1000 (so 1150 max per query)
  *  - rate limit is a few calls/second -> requests are serialized with a small delay
  *  - `typeContrat` accepts a comma separated list (CDI, CDD, MIS, SAI, ...)
- *  - alternance is NOT a typeContrat: it is the `alternance=true` flag
- *    (natureContrat E2 = apprentissage, FS/E1 = professionnalisation),
+ *  - alternance is NOT a typeContrat: it is filtered with natureContrat=E2,FS
+ *    (E2 = apprentissage, FS = professionnalisation),
  *    so each contract group is fetched as its own query and merged.
  */
 
@@ -130,7 +130,10 @@ async function searchPage(
   if (criteria.departments?.length) params.set("departement", criteria.departments.join(","));
   if (criteria.regions?.length) params.set("region", criteria.regions.join(","));
   if (criteria.typeContrat?.length) params.set("typeContrat", criteria.typeContrat.join(","));
-  if (criteria.alternance) params.set("alternance", "true");
+  // The `alternance=true` flag is silently ignored by /offres/search (returns ~all offers).
+  // Filter on the contract nature instead: E2 = apprentissage, FS = professionnalisation,
+  // the same codes candidat.francetravail.fr uses for its "Alternance" filter.
+  if (criteria.alternance) params.set("natureContrat", "E2,FS");
   if (criteria.keywords) params.set("motsCles", criteria.keywords);
   if (criteria.publishedWithinDays) params.set("publieeDepuis", String(criteria.publishedWithinDays));
   params.set("sort", "1"); // 1 = sort by date, most recent first

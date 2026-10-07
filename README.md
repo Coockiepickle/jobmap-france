@@ -64,7 +64,7 @@ Parameters used by this prototype:
 | `departement`   | comma-separated INSEE department codes (`69,38,2A,974`)                |
 | `region`        | one INSEE region code per call — extra regions are expanded to departments |
 | `typeContrat`   | `CDI`, `CDD`, `DDI`, `CCE`, `MIS`, `TTI`                               |
-| `alternance`    | `true` for the alternance family (apprentissage + professionnalisation) |
+| `natureContrat` | `E2,FS` for the alternance family (E2 = apprentissage, FS = professionnalisation). The `alternance=true` flag is ignored by the search endpoint |
 | `motsCles`      | free-text keywords                                                     |
 | `publieeDepuis` | `1`, `3`, `7`, `14`, `31` days                                         |
 | `sort`          | `1` (most recent first)                                                |
