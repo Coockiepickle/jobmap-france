@@ -14,6 +14,8 @@ import type { ContractGroup, Job, JobsResponse } from "@shared/types";
 import { CONTRACT_GROUPS } from "@shared/types";
 import JobMap from "@/components/job-map";
 import JobDetail, { relativeDate } from "@/components/job-detail";
+import OnboardingGuide, { GuideButton } from "@/components/onboarding-guide";
+import { isGuideDismissed, markGuideDismissed } from "@/lib/guide-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -77,6 +79,13 @@ export default function Home() {
   const [limit, setLimit] = useState("400");
   const [depFilter, setDepFilter] = useState("");
   const [selected, setSelected] = useState<Job | null>(null);
+
+  // ----- guide d'accueil ------------------------------------------------
+  const [guideOpen, setGuideOpen] = useState(() => !isGuideDismissed());
+  const closeGuide = () => {
+    markGuideDismissed();
+    setGuideOpen(false);
+  };
 
   const { data: ref } = useQuery<Referentiel>({ queryKey: ["/api/referentiel"] });
 
@@ -297,6 +306,8 @@ export default function Home() {
 
   return (
     <div className="flex h-[100dvh] w-full flex-col overflow-hidden bg-background text-foreground">
+      <OnboardingGuide open={guideOpen} onClose={closeGuide} />
+
       {/* Header */}
       <header className="z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-3 md:px-4">
         <Logo />
@@ -324,6 +335,7 @@ export default function Home() {
               {meta.mode === "france-travail" ? "API France Travail" : "Jeu de démonstration"}
             </span>
           )}
+          <GuideButton onClick={() => setGuideOpen(true)} />
           <Button
             size="icon"
             variant="ghost"
