@@ -146,7 +146,8 @@ export default function MultiSelect({
           <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      {/* z-[1300] keeps the list above the mobile filters Sheet (z-[1200]) */}
+      <PopoverContent className="z-[1300] w-[300px] p-0" align="start">
         <Command filter={accentInsensitiveFilter}>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>

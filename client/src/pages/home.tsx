@@ -19,8 +19,6 @@ import OnboardingGuide, { GuideButton } from "@/components/onboarding-guide";
 import { isGuideDismissed, markGuideDismissed } from "@/lib/guide-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -83,7 +81,6 @@ export default function Home() {
   const [keywords, setKeywords] = useState("");
   const [freshness, setFreshness] = useState("31");
   const [limit, setLimit] = useState("400");
-  const [depFilter, setDepFilter] = useState("");
   const [domaines, setDomaines] = useState<string[]>([]);
   const [selected, setSelected] = useState<Job | null>(null);
 
@@ -133,27 +130,23 @@ export default function Home() {
     return m;
   }, [jobs]);
 
-  const visibleDepartments = useMemo(() => {
+  /** Departments offered in the picker — restricted to the selected region. */
+  const departmentOptions = useMemo(() => {
     const list = ref?.departments ?? [];
-    const needle = depFilter.trim().toLowerCase();
-    return list.filter(
-      (d) =>
-        (region === "all" || d.region === region) &&
-        (!needle || d.name.toLowerCase().includes(needle) || d.code.startsWith(needle)),
-    );
-  }, [ref, depFilter, region]);
+    return (region === "all" ? list : list.filter((d) => d.region === region)).map((d) => ({
+      value: d.code,
+      label: d.name,
+      hint: d.code,
+    }));
+  }, [ref, region]);
 
   const toggleContract = (id: ContractGroup) =>
     setContracts((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
 
-  const toggleDepartment = (code: string) =>
-    setDepartments((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
-
   /* ------------------------------------------------------------------ */
 
   const filters = (
-    <div className="flex h-full flex-col">
-      <div className="space-y-4 border-b border-border p-4">
+    <div className="space-y-4 p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -280,59 +273,34 @@ export default function Home() {
             placeholder="Tous les domaines"
             searchPlaceholder="Domaine (restauration, informatique…)"
             testId="select-domaine"
+            ariaLabel="Domaines d'emploi"
             emptyLabel="Aucun domaine correspondant."
           />
           <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
             Domaines officiels du référentiel France Travail.
           </p>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between px-4 pb-2 pt-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Départements {departments.length > 0 && `(${departments.length})`}
-        </p>
-        {departments.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setDepartments([])}
-            className="text-xs text-primary hover:underline"
-            data-testid="button-clear-departments"
-          >
-            Effacer
-          </button>
-        )}
-      </div>
-      <div className="px-4 pb-2">
-        <Input
-          value={depFilter}
-          onChange={(e) => setDepFilter(e.target.value)}
-          placeholder="Filtrer (69, Rhône…)"
-          className="h-8 text-sm"
-          data-testid="input-department-filter"
-        />
-      </div>
-      <ScrollArea className="min-h-0 flex-1 px-4">
-        <div className="space-y-0.5 pb-4">
-          {visibleDepartments.map((d) => (
-            <label
-              key={d.code}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover-elevate"
-              data-testid={`checkbox-department-${d.code}`}
-            >
-              <Checkbox
-                checked={departments.includes(d.code)}
-                onCheckedChange={() => toggleDepartment(d.code)}
-              />
-              <span className="font-mono text-xs text-muted-foreground">{d.code}</span>
-              <span className="truncate">{d.name}</span>
-            </label>
-          ))}
-          {visibleDepartments.length === 0 && (
-            <p className="px-2 py-4 text-sm text-muted-foreground">Aucun département correspondant.</p>
-          )}
+        <div>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Départements
+          </p>
+          <MultiSelect
+            options={departmentOptions}
+            selected={departments}
+            onChange={setDepartments}
+            placeholder="Toute la France"
+            searchPlaceholder="Département (69, Rhône…)"
+            testId="select-departements"
+            ariaLabel="Départements"
+            emptyLabel="Aucun département correspondant."
+          />
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+            {region !== "all"
+              ? "Départements de la région sélectionnée."
+              : "Plusieurs départements possibles ; choisir une région les replace."}
+          </p>
         </div>
-      </ScrollArea>
     </div>
   );
 
