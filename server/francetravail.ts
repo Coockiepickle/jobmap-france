@@ -25,6 +25,8 @@ import { departmentFromLabel, getDepartment } from "./geo.js";
 const TOKEN_URL =
   "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire";
 const SEARCH_URL = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
+const REFERENTIEL_DOMAINES_URL =
+  "https://api.francetravail.io/partenaire/offresdemploi/v2/referentiel/domaines";
 export const SCOPE = "api_offresdemploiv2 o2dsoffre";
 
 const PAGE_SIZE = 150; // hard API maximum per call
@@ -66,6 +68,39 @@ export async function getAccessToken(): Promise<string> {
     expiresAt: Date.now() + (json.expires_in ?? 1500) * 1000,
   };
   return cachedToken.value;
+}
+
+/* ------------------------------------------------------------------ */
+/* Référentiel des domaines métiers                                    */
+/* ------------------------------------------------------------------ */
+
+export interface DomaineMetier {
+  code: string;
+  libelle: string;
+}
+
+let cachedDomaines: { value: DomaineMetier[]; expiresAt: number } | null = null;
+const DOMAINES_TTL = 24 * 60 * 60 * 1000; // the referential changes a few times a year
+
+/** Fetch the official "domaines métiers" referential (cached 24 h in-process). */
+export async function getDomaines(): Promise<DomaineMetier[]> {
+  if (cachedDomaines && cachedDomaines.expiresAt > Date.now()) return cachedDomaines.value;
+
+  const token = await getAccessToken();
+  const res = await fetch(REFERENTIEL_DOMAINES_URL, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    throw new Error(`France Travail referentiel failed (${res.status}): ${await res.text()}`);
+  }
+
+  const json = (await res.json()) as { code: string; libelle: string }[];
+  const value = (Array.isArray(json) ? json : [])
+    .filter((d) => d?.code && d?.libelle)
+    .map((d) => ({ code: d.code, libelle: d.libelle }));
+  cachedDomaines = { value, expiresAt: Date.now() + DOMAINES_TTL };
+  return value;
 }
 
 /* ------------------------------------------------------------------ */
@@ -112,6 +147,8 @@ export interface SearchCriteria {
   keywords?: string | null;
   /** 1, 3, 7, 14 or 31 */
   publishedWithinDays?: number | null;
+  /** France Travail "domaine métier" codes, e.g. ["G17", "M18"] */
+  domaines?: string[];
   /** how many offers to pull for this criteria set (capped at 1150 by the API) */
   limit?: number;
 }
@@ -134,6 +171,9 @@ async function searchPage(
   // Filter on the contract nature instead: E2 = apprentissage, FS = professionnalisation,
   // the same codes candidat.francetravail.fr uses for its "Alternance" filter.
   if (criteria.alternance) params.set("natureContrat", "E2,FS");
+  // `domaine` filters by the official "domaines métiers" referential
+  // (e.g. G17 = Hôtellerie-restauration). Values are joined with commas.
+  if (criteria.domaines?.length) params.set("domaine", criteria.domaines.join(","));
   if (criteria.keywords) params.set("motsCles", criteria.keywords);
   if (criteria.publishedWithinDays) params.set("publieeDepuis", String(criteria.publishedWithinDays));
   params.set("sort", "1"); // 1 = sort by date, most recent first

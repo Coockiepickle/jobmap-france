@@ -6,12 +6,13 @@ import { DEPARTMENTS, REGIONS, departmentsOfRegion } from "./geo.js";
 import {
   SCOPE,
   criteriaForGroup,
+  getDomaines,
   hasCredentials,
   normalizeOffer,
   searchOffers,
   type SearchCriteria,
 } from "./francetravail.js";
-import { searchDemoOffers } from "./demo.js";
+import { DEMO_DOMAINES, searchDemoOffers } from "./demo.js";
 
 const listParam = (value: unknown): string[] =>
   String(value ?? "")
@@ -26,6 +27,7 @@ const querySchema = z.object({
   motsCles: z.string().optional(),
   publieeDepuis: z.coerce.number().int().min(1).max(31).optional(),
   limit: z.coerce.number().int().min(50).max(1150).optional(),
+  domaine: z.string().optional(),
 });
 
 const VALID_GROUPS: ContractGroup[] = ["alternance", "CDI", "CDD", "interim"];
@@ -49,6 +51,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json({ departments: DEPARTMENTS, regions: REGIONS });
   });
 
+  /** Official France Travail "domaines métiers" for the job-domain filter. */
+  app.get("/api/referentiel/domaines", async (_req, res, next) => {
+    try {
+      if (hasCredentials()) {
+        res.json(await getDomaines());
+      } else {
+        res.json(DEMO_DOMAINES);
+      }
+    } catch (err) {
+      next(err);
+    }
+  });
+
   /**
    * GET /api/jobs
    *   ?departements=69,38&regions=11&contrats=alternance,CDI&motsCles=devops
@@ -70,6 +85,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const contracts = (listParam(q.contrats) as ContractGroup[]).filter((c) =>
         VALID_GROUPS.includes(c),
       );
+      // "domaines métiers" codes from the France Travail referential (e.g. G17).
+      const domaines = listParam(q.domaine)
+        .map((d) => d.toUpperCase())
+        .filter((d) => /^[A-Z][0-9]{2}$/.test(d))
+        .slice(0, 10);
       const groups: ContractGroup[] = contracts.length ? contracts : VALID_GROUPS;
       const keywords = q.motsCles?.trim() || null;
       const publishedWithinDays = q.publieeDepuis ?? null;
@@ -83,6 +103,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         keywords,
         publishedWithinDays,
         maxPerGroup,
+        domaines,
       });
       const hit = cache.get(cacheKey);
       if (hit && Date.now() - hit.at < CACHE_TTL) return res.json(hit.payload);
@@ -97,6 +118,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         regions: primaryRegion ? [primaryRegion] : [],
         keywords,
         publishedWithinDays,
+        domaines: domaines.length ? domaines : undefined,
         limit: maxPerGroup,
       };
 

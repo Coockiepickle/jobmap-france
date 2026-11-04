@@ -14,6 +14,7 @@ import type { ContractGroup, Job, JobsResponse } from "@shared/types";
 import { CONTRACT_GROUPS } from "@shared/types";
 import JobMap from "@/components/job-map";
 import JobDetail, { relativeDate } from "@/components/job-detail";
+import MultiSelect from "@/components/multi-select";
 import OnboardingGuide, { GuideButton } from "@/components/onboarding-guide";
 import { isGuideDismissed, markGuideDismissed } from "@/lib/guide-storage";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,11 @@ interface DepartmentInfo {
 interface Referentiel {
   departments: DepartmentInfo[];
   regions: { code: string; name: string }[];
+}
+
+interface DomaineMetier {
+  code: string;
+  libelle: string;
 }
 
 const COLORS = Object.fromEntries(CONTRACT_GROUPS.map((g) => [g.id, g.color]));
@@ -78,6 +84,7 @@ export default function Home() {
   const [freshness, setFreshness] = useState("31");
   const [limit, setLimit] = useState("400");
   const [depFilter, setDepFilter] = useState("");
+  const [domaines, setDomaines] = useState<string[]>([]);
   const [selected, setSelected] = useState<Job | null>(null);
 
   // ----- guide d'accueil ------------------------------------------------
@@ -89,16 +96,23 @@ export default function Home() {
 
   const { data: ref } = useQuery<Referentiel>({ queryKey: ["/api/referentiel"] });
 
+  const { data: domainList } = useQuery<DomaineMetier[]>({
+    queryKey: ["/api/referentiel/domaines"],
+    queryFn: async () => (await apiRequest("GET", "/api/referentiel/domaines")).json(),
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
   const params = useMemo(() => {
     const p = new URLSearchParams();
     if (departments.length) p.set("departements", departments.join(","));
     if (region !== "all") p.set("regions", region);
+    if (domaines.length) p.set("domaine", domaines.join(","));
     p.set("contrats", contracts.join(","));
     if (keywords.trim()) p.set("motsCles", keywords.trim());
     if (freshness !== "all") p.set("publieeDepuis", freshness);
     p.set("limit", limit);
     return p.toString();
-  }, [departments, region, contracts, keywords, freshness, limit]);
+  }, [departments, region, contracts, keywords, freshness, limit, domaines]);
 
   const { data, isFetching, isError, error, refetch } = useQuery<JobsResponse>({
     queryKey: ["/api/jobs", params],
@@ -253,6 +267,24 @@ export default function Home() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Domaine d'emploi
+          </p>
+          <MultiSelect
+            options={(domainList ?? []).map((d) => ({ value: d.code, label: d.libelle }))}
+            selected={domaines}
+            onChange={setDomaines}
+            placeholder="Tous les domaines"
+            searchPlaceholder="Domaine (restauration, informatique…)"
+            testId="select-domaine"
+            emptyLabel="Aucun domaine correspondant."
+          />
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+            Domaines officiels du référentiel France Travail.
+          </p>
         </div>
       </div>
 

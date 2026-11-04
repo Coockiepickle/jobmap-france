@@ -244,6 +244,13 @@ export function searchDemoOffers(criteria: SearchCriteria): { offers: RawOffer[]
   cache = cache ?? buildDemoOffers();
   let list = cache;
 
+  // Domaines métiers: the first 3 chars of a ROME code are its "domaine
+  // professionnel" (e.g. G1803 "Serveur de restaurant" -> G18 restauration).
+  if (criteria.domaines?.length) {
+    const codes = new Set(criteria.domaines);
+    list = list.filter((o) => codes.has((o.romeCode ?? "").slice(0, 3)));
+  }
+
   const deps = new Set<string>(criteria.departments ?? []);
   for (const region of criteria.regions ?? []) {
     for (const d of departmentsOfRegion(region)) deps.add(d);
@@ -290,3 +297,16 @@ export function searchDemoOffers(criteria: SearchCriteria): { offers: RawOffer[]
 export const DEMO_DEPARTMENT_CODES = Array.from(new Set(CITIES.map((c) => c.dep))).filter((c) =>
   DEPARTMENTS.some((d) => d.code === c),
 );
+
+/**
+ * Demo "domaines métiers" referential, derived from the ROME codes used by the
+ * ROLES above (first 3 chars of a ROME code = its domaine professionnel).
+ * Production serves the official France Travail referential instead.
+ */
+export const DEMO_DOMAINES: { code: string; libelle: string }[] = (() => {
+  const byCode = new Map<string, string>();
+  for (const role of ROLES) byCode.set(role.rome.slice(0, 3), role.romeLabel);
+  return Array.from(byCode.entries())
+    .map(([code, libelle]) => ({ code, libelle }))
+    .sort((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
+})();
