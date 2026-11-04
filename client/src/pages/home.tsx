@@ -13,13 +13,12 @@ import {
 import type { ContractGroup, Job, JobsResponse } from "@shared/types";
 import { CONTRACT_GROUPS } from "@shared/types";
 import JobMap from "@/components/job-map";
-import JobDetail, { relativeDate } from "@/components/job-detail";
+import JobDetail from "@/components/job-detail";
 import MultiSelect from "@/components/multi-select";
 import OnboardingGuide, { GuideButton } from "@/components/onboarding-guide";
 import { isGuideDismissed, markGuideDismissed } from "@/lib/guide-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Select,
@@ -322,6 +321,31 @@ export default function Home() {
 
         <div className="ml-auto flex items-center gap-2">
           {meta && (
+            <div
+              aria-live="polite"
+              className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs lg:flex"
+            >
+              <span className="font-mono text-sm font-semibold tabular-nums" data-testid="text-plotted">
+                {jobs.length}
+              </span>
+              <span className="text-muted-foreground">
+                offres cartographiées
+                {meta.total > jobs.length && (
+                  <>
+                    {" · "}
+                    <span className="font-mono tabular-nums">{meta.total.toLocaleString("fr-FR")}</span>{" "}
+                    correspondent aux filtres
+                  </>
+                )}
+              </span>
+            </div>
+          )}
+          {meta && meta.dropped > 0 && (
+            <div className="hidden items-center rounded-full border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground xl:flex">
+              {meta.dropped} sans géolocalisation
+            </div>
+          )}
+          {meta && (
             <span
               className={cn(
                 "hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium sm:inline-flex",
@@ -383,35 +407,6 @@ export default function Home() {
             fitKey={params}
           />
 
-          {/* Stats bar */}
-          <div className="pointer-events-none absolute left-3 top-3 z-[500] flex flex-wrap gap-2">
-            <div className="pointer-events-auto rounded-lg border border-border bg-card/95 px-3 py-2 text-xs shadow-sm backdrop-blur">
-              {isFetching && !data ? (
-                <Skeleton className="h-4 w-40" />
-              ) : (
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-sm font-semibold tabular-nums" data-testid="text-plotted">
-                    {jobs.length}
-                  </span>
-                  <span className="text-muted-foreground">
-                    offres cartographiées{" "}
-                    {meta && meta.total > jobs.length && (
-                      <>
-                        · <span className="font-mono tabular-nums">{meta.total.toLocaleString("fr-FR")}</span>{" "}
-                        correspondent aux filtres
-                      </>
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
-            {meta && meta.dropped > 0 && (
-              <div className="pointer-events-auto rounded-lg border border-border bg-card/95 px-3 py-2 text-xs text-muted-foreground shadow-sm backdrop-blur">
-                {meta.dropped} offre(s) sans géolocalisation exploitable
-              </div>
-            )}
-          </div>
-
           {/* Legend */}
           <div className="pointer-events-none absolute bottom-3 left-3 z-[500] hidden rounded-lg border border-border bg-card/95 p-3 text-xs shadow-sm backdrop-blur sm:block">
             <p className="mb-2 font-semibold uppercase tracking-wider text-muted-foreground">
@@ -467,35 +462,6 @@ export default function Home() {
           </div>
         )}
       </div>
-
-      {/* Footer strip */}
-      <footer className="z-20 flex h-8 shrink-0 items-center gap-3 border-t border-border bg-card px-4 text-[11px] text-muted-foreground">
-        <span>
-          Données&nbsp;:{" "}
-          <a
-            href="https://francetravail.io/data/api/offres-emploi"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline underline-offset-2"
-          >
-            API Offres d'emploi v2
-          </a>{" "}
-          · Fond de carte&nbsp;:{" "}
-          <a
-            href="https://www.openstreetmap.org/copyright"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline underline-offset-2"
-          >
-            OpenStreetMap
-          </a>
-        </span>
-        {meta && (
-          <span className="ml-auto hidden font-mono sm:block">
-            maj {relativeDate(meta.fetchedAt)} · {meta.query.contracts.join(" / ")}
-          </span>
-        )}
-      </footer>
     </div>
   );
 }
