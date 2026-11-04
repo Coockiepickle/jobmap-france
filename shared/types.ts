@@ -80,5 +80,5 @@ export const CONTRACT_GROUPS: {
   { id: "alternance", label: "Alternance", color: "#f59e0b", hint: "Apprentissage & professionnalisation" },
   { id: "CDI", label: "CDI", color: "#2563eb", hint: "Contrat à durée indéterminée" },
   { id: "CDD", label: "CDD", color: "#10b981", hint: "Contrat à durée déterminée" },
-  { id: "interim", label: "Intérim", color: "#a855f7", hint: "Mission d'intérim (MIS)" },
+  { id: "interim", label: "Intérim", color: "#db2777", hint: "Mission d'intérim (MIS)" },
 ];

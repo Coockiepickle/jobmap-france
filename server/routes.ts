@@ -142,6 +142,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
               dropped++;
               continue;
             }
+            // Apprenticeship/professionalisation offers (nature E2/FS) match
+            // typeContrat queries too (a CDD apprenticeship has typeContrat=CDD).
+            // They belong to the "alternance" bucket only — otherwise their
+            // amber pin shows up inside a CDI/CDD/interim filter, which looks
+            // like a wrong color. The demo corpus applies the same rule.
+            if (group !== "alternance" && job.contractGroup === "alternance") continue;
             // An offer can match two queries (e.g. an alternance CDD): keep the
             // alternance classification, which is the more specific one.
             const existing = byId.get(job.id);
