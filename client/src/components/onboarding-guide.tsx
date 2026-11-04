@@ -56,6 +56,11 @@ const STEPS: Step[] = [
             intérim — chaque filtre affiche le nombre d'offres correspondantes ;
           </li>
           <li>
+            filtrer par <strong>domaine d'emploi</strong> (restauration,
+            informatique, hôtellerie…), avec les domaines officiels France
+            Travail ;
+          </li>
+          <li>
             restreindre à une <strong>région</strong> ou des{" "}
             <strong>départements</strong> précis, et régler la fraîcheur de
             publication et le volume maximum d'offres.
