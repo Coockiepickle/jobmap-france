@@ -126,10 +126,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (live && domaines.length > 1) {
         try {
           const metiers = await getMetiers();
-          const codes = metiers
+          const matching = metiers
             .filter((m) => domaines.includes(m.code.slice(0, 3)))
-            .map((m) => m.code)
-            .slice(0, 200);
+            .map((m) => m.code);
+          const codes = matching.slice(0, 200);
+          if (matching.length > codes.length) {
+            warnings.push(
+              `domaine : sélection large, interrogation limitée aux 200 premiers codes métiers sur ${matching.length}`,
+            );
+          }
           if (codes.length) {
             searchDomaines = undefined;
             romeCodes = codes;

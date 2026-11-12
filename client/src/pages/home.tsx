@@ -391,6 +391,19 @@ export default function Home() {
         </div>
       </header>
 
+      {meta && meta.warnings.length > 0 && (
+        <div
+          role="status"
+          className="flex shrink-0 items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-700 md:px-4 dark:text-amber-400"
+          data-testid="warnings"
+        >
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span className="min-w-0">
+            {meta.warnings.join(" · ")}
+          </span>
+        </div>
+      )}
+
       <div className="flex min-h-0 flex-1">
         {/* Filters + results */}
         <div className="hidden w-[340px] shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
