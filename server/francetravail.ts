@@ -27,6 +27,8 @@ const TOKEN_URL =
 const SEARCH_URL = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
 const REFERENTIEL_DOMAINES_URL =
   "https://api.francetravail.io/partenaire/offresdemploi/v2/referentiel/domaines";
+const REFERENTIEL_METIERS_URL =
+  "https://api.francetravail.io/partenaire/offresdemploi/v2/referentiel/metiers";
 export const SCOPE = "api_offresdemploiv2 o2dsoffre";
 
 const PAGE_SIZE = 150; // hard API maximum per call
@@ -80,26 +82,43 @@ export interface DomaineMetier {
 }
 
 let cachedDomaines: { value: DomaineMetier[]; expiresAt: number } | null = null;
+let cachedMetiers: { value: DomaineMetier[]; expiresAt: number } | null = null;
 const DOMAINES_TTL = 24 * 60 * 60 * 1000; // the referential changes a few times a year
 
-/** Fetch the official "domaines métiers" referential (cached 24 h in-process). */
-export async function getDomaines(): Promise<DomaineMetier[]> {
-  if (cachedDomaines && cachedDomaines.expiresAt > Date.now()) return cachedDomaines.value;
-
+/** Fetch an official referential (cached 24 h in-process). */
+async function fetchReferentiel(url: string, label: string): Promise<DomaineMetier[]> {
   const token = await getAccessToken();
-  const res = await fetch(REFERENTIEL_DOMAINES_URL, {
+  const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
   });
 
   if (!res.ok) {
-    throw new Error(`France Travail referentiel failed (${res.status}): ${await res.text()}`);
+    throw new Error(`France Travail ${label} failed (${res.status}): ${await res.text()}`);
   }
 
   const json = (await res.json()) as { code: string; libelle: string }[];
-  const value = (Array.isArray(json) ? json : [])
+  return (Array.isArray(json) ? json : [])
     .filter((d) => d?.code && d?.libelle)
     .map((d) => ({ code: d.code, libelle: d.libelle }));
+}
+
+/** Official "domaines métiers" referential (e.g. G16 = Production culinaire). */
+export async function getDomaines(): Promise<DomaineMetier[]> {
+  if (cachedDomaines && cachedDomaines.expiresAt > Date.now()) return cachedDomaines.value;
+  const value = await fetchReferentiel(REFERENTIEL_DOMAINES_URL, "referentiel domaines");
   cachedDomaines = { value, expiresAt: Date.now() + DOMAINES_TTL };
+  return value;
+}
+
+/**
+ * Official ROME "métiers" referential (e.g. G1602 = Cuisinier).
+ * Used to translate a multi-domain selection into a single `codeROME`
+ * query — /offres/search only accepts one `domaine` value per call.
+ */
+export async function getMetiers(): Promise<DomaineMetier[]> {
+  if (cachedMetiers && cachedMetiers.expiresAt > Date.now()) return cachedMetiers.value;
+  const value = await fetchReferentiel(REFERENTIEL_METIERS_URL, "referentiel metiers");
+  cachedMetiers = { value, expiresAt: Date.now() + DOMAINES_TTL };
   return value;
 }
 
@@ -149,6 +168,8 @@ export interface SearchCriteria {
   publishedWithinDays?: number | null;
   /** France Travail "domaine métier" codes, e.g. ["G17", "M18"] */
   domaines?: string[];
+  /** Full ROME codes, e.g. ["G1602", "M1805"] — used when several domains are selected */
+  romeCodes?: string[];
   /** how many offers to pull for this criteria set (capped at 1150 by the API) */
   limit?: number;
 }
@@ -172,8 +193,10 @@ async function searchPage(
   // the same codes candidat.francetravail.fr uses for its "Alternance" filter.
   if (criteria.alternance) params.set("natureContrat", "E2,FS");
   // `domaine` filters by the official "domaines métiers" referential
-  // (e.g. G17 = Hôtellerie-restauration). Values are joined with commas.
+  // (e.g. G16 = Production culinaire). The API accepts a SINGLE value per
+  // call, so several domains are translated to `codeROME` upstream.
   if (criteria.domaines?.length) params.set("domaine", criteria.domaines.join(","));
+  if (criteria.romeCodes?.length) params.set("codeROME", criteria.romeCodes.join(","));
   if (criteria.keywords) params.set("motsCles", criteria.keywords);
   if (criteria.publishedWithinDays) params.set("publieeDepuis", String(criteria.publishedWithinDays));
   params.set("sort", "1"); // 1 = sort by date, most recent first

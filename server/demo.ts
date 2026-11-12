@@ -245,10 +245,15 @@ export function searchDemoOffers(criteria: SearchCriteria): { offers: RawOffer[]
   let list = cache;
 
   // Domaines métiers: the first 3 chars of a ROME code are its "domaine
-  // professionnel" (e.g. G1803 "Serveur de restaurant" -> G18 restauration).
+  // professionnel" (e.g. G1803 "Serveur de restaurant" -> G18 Service).
   if (criteria.domaines?.length) {
     const codes = new Set(criteria.domaines);
     list = list.filter((o) => codes.has((o.romeCode ?? "").slice(0, 3)));
+  }
+  // Full ROME codes (live multi-domain queries are translated upstream).
+  if (criteria.romeCodes?.length) {
+    const codes = new Set(criteria.romeCodes);
+    list = list.filter((o) => codes.has(o.romeCode ?? ""));
   }
 
   const deps = new Set<string>(criteria.departments ?? []);
@@ -299,14 +304,26 @@ export const DEMO_DEPARTMENT_CODES = Array.from(new Set(CITIES.map((c) => c.dep)
 );
 
 /**
- * Demo "domaines métiers" referential, derived from the ROME codes used by the
- * ROLES above (first 3 chars of a ROME code = its domaine professionnel).
- * Production serves the official France Travail referential instead.
+ * Demo "domaines métiers" referential — the codes and official labels of the
+ * domains covered by the ROLES above (first 3 chars of a ROME code = its
+ * domaine professionnel), taken from the France Travail referential.
+ * Production serves the official referential instead.
  */
-export const DEMO_DOMAINES: { code: string; libelle: string }[] = (() => {
-  const byCode = new Map<string, string>();
-  for (const role of ROLES) byCode.set(role.rome.slice(0, 3), role.romeLabel);
-  return Array.from(byCode.entries())
-    .map(([code, libelle]) => ({ code, libelle }))
-    .sort((a, b) => a.libelle.localeCompare(b.libelle, "fr"));
-})();
+export const DEMO_DOMAINES: { code: string; libelle: string }[] = [
+  { code: "C12", libelle: "Banque" },
+  { code: "D14", libelle: "Force de vente" },
+  { code: "F16", libelle: "Second oeuvre" },
+  { code: "F17", libelle: "Travaux et gros oeuvre" },
+  { code: "G16", libelle: "Production culinaire" },
+  { code: "G18", libelle: "Service" },
+  { code: "H27", libelle: "Energie" },
+  { code: "I13", libelle: "Equipements de production, équipements collectifs" },
+  { code: "I14", libelle: "Equipements domestiques et informatique" },
+  { code: "J15", libelle: "Soins paramédicaux" },
+  { code: "M12", libelle: "Comptabilité et gestion" },
+  { code: "M14", libelle: "Organisation et études" },
+  { code: "M15", libelle: "Ressources humaines" },
+  { code: "M18", libelle: "Systèmes d'information et de télécommunication" },
+  { code: "N11", libelle: "Magasinage, manutention des charges et déménagement" },
+  { code: "N41", libelle: "Personnel de conduite du transport routier" },
+];

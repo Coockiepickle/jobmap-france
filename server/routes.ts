@@ -7,6 +7,7 @@ import {
   SCOPE,
   criteriaForGroup,
   getDomaines,
+  getMetiers,
   hasCredentials,
   normalizeOffer,
   searchOffers,
@@ -113,17 +114,44 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const expandedDepartments = new Set(departments);
       for (const r of extraRegions) for (const d of departmentsOfRegion(r)) expandedDepartments.add(d);
 
+      const live = hasCredentials();
+      const warnings: string[] = [];
+
+      // /offres/search accepts a single `domaine` value per call. When several
+      // domains are selected (live mode), they are translated into their ROME
+      // métier codes via the official referential — `codeROME` accepts up to
+      // 200 comma-separated values. Fallback: query the first domain only.
+      let searchDomaines = domaines.length ? domaines : undefined;
+      let romeCodes: string[] | undefined;
+      if (live && domaines.length > 1) {
+        try {
+          const metiers = await getMetiers();
+          const codes = metiers
+            .filter((m) => domaines.includes(m.code.slice(0, 3)))
+            .map((m) => m.code)
+            .slice(0, 200);
+          if (codes.length) {
+            searchDomaines = undefined;
+            romeCodes = codes;
+          } else {
+            searchDomaines = domaines.slice(0, 1);
+            warnings.push(`domaine: seul ${domaines[0]} a pu être interrogé`);
+          }
+        } catch {
+          searchDomaines = domaines.slice(0, 1);
+          warnings.push(`domaine: seul ${domaines[0]} a pu être interrogé`);
+        }
+      }
+
       const base: SearchCriteria = {
         departments: Array.from(expandedDepartments),
         regions: primaryRegion ? [primaryRegion] : [],
         keywords,
         publishedWithinDays,
-        domaines: domaines.length ? domaines : undefined,
+        domaines: searchDomaines,
+        romeCodes,
         limit: maxPerGroup,
       };
-
-      const live = hasCredentials();
-      const warnings: string[] = [];
       const availableByGroup: Record<string, number> = {};
       const byId = new Map<string, Job>();
       let dropped = 0;
