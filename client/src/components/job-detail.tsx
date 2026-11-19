@@ -95,6 +95,35 @@ export default function JobDetail({ job, onClose }: { job: Job; onClose: () => v
               {job.description ?? "Aucun descriptif fourni par le recruteur."}
             </p>
           </div>
+
+          {job.competences.length > 0 && (
+            <div data-testid="section-competences">
+              <div className="mb-2 flex items-baseline justify-between gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Compétences
+                </h3>
+                <span className="text-[11px] text-muted-foreground">
+                  <span className="font-medium text-primary">exigée</span> · souhaitée
+                </span>
+              </div>
+              <ul className="flex flex-wrap gap-1.5">
+                {job.competences.map((c, i) => (
+                  <li key={`${job.id}-comp-${i}`}>
+                    <span
+                      className={
+                        c.exigence === "E"
+                          ? "inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                          : "inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                      }
+                      data-testid={`badge-competence-${i}`}
+                    >
+                      {c.libelle}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </ScrollArea>
 

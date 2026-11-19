@@ -149,6 +149,7 @@ export interface RawOffer {
   experienceLibelle?: string;
   salaire?: { libelle?: string; commentaire?: string };
   dureeTravailLibelle?: string;
+  competences?: { code?: string; libelle?: string; exigence?: string }[];
   alternance?: boolean;
   nombrePostes?: number;
   origineOffre?: { origine?: string; urlOrigine?: string };
@@ -330,6 +331,13 @@ export function normalizeOffer(offer: RawOffer): Job | null {
     workingTime: offer.dureeTravailLibelle ?? null,
     salary: offer.salaire?.libelle ?? offer.salaire?.commentaire ?? null,
     positions: offer.nombrePostes ?? null,
+    competences: (offer.competences ?? [])
+      .filter((c) => c?.libelle)
+      .slice(0, 15)
+      .map((c) => ({
+        libelle: c.libelle as string,
+        exigence: c.exigence === "E" || c.exigence === "S" ? c.exigence : null,
+      })),
     description: offer.description ? offer.description.slice(0, 1800) : null,
     createdAt: offer.dateCreation ?? null,
     updatedAt: offer.dateActualisation ?? null,

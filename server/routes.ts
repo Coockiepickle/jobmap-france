@@ -55,11 +55,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   /** Official France Travail "domaines métiers" for the job-domain filter. */
   app.get("/api/referentiel/domaines", async (_req, res, next) => {
     try {
-      if (hasCredentials()) {
-        res.json(await getDomaines());
-      } else {
-        res.json(DEMO_DOMAINES);
-      }
+      const domaines = hasCredentials() ? await getDomaines() : DEMO_DOMAINES;
+      // alphabetical order (French locale) so the dropdown is easy to scan
+      res.json([...domaines].sort((a, b) => a.libelle.localeCompare(b.libelle, "fr")));
     } catch (err) {
       next(err);
     }

@@ -32,6 +32,8 @@ export interface Job {
   workingTime: string | null;
   salary: string | null;
   positions: number | null;
+  /** France Travail skills — exigence: "E" exigée, "S" souhaitée */
+  competences: { libelle: string; exigence: "E" | "S" | null }[];
   description: string | null;
   createdAt: string | null;
   updatedAt: string | null;

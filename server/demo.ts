@@ -94,29 +94,30 @@ interface Role {
   rome: string;
   romeLabel: string;
   salary: [number, number];
+  skills: string[];
 }
 
 const ROLES: Role[] = [
-  { title: "Administrateur systèmes et réseaux", rome: "M1801", romeLabel: "Administration de systèmes d'information", salary: [32, 48] },
-  { title: "Ingénieur DevOps", rome: "M1805", romeLabel: "Études et développement informatique", salary: [42, 62] },
-  { title: "Développeur Full Stack", rome: "M1805", romeLabel: "Études et développement informatique", salary: [36, 55] },
-  { title: "Technicien support informatique", rome: "I1401", romeLabel: "Maintenance informatique et bureautique", salary: [24, 32] },
-  { title: "Data analyst", rome: "M1403", romeLabel: "Études et prospectives socio-économiques", salary: [38, 52] },
-  { title: "Chef de projet SI", rome: "M1806", romeLabel: "Conseil et maîtrise d'ouvrage en SI", salary: [45, 65] },
-  { title: "Comptable général", rome: "M1203", romeLabel: "Comptabilité", salary: [30, 42] },
-  { title: "Assistant(e) commercial(e)", rome: "D1401", romeLabel: "Assistanat commercial", salary: [24, 30] },
-  { title: "Conducteur de ligne de production", rome: "H2701", romeLabel: "Pilotage d'installation énergétique", salary: [26, 34] },
-  { title: "Technicien de maintenance industrielle", rome: "I1304", romeLabel: "Installation et maintenance d'équipements industriels", salary: [28, 38] },
-  { title: "Infirmier(ère) diplômé(e) d'État", rome: "J1502", romeLabel: "Coordination de services médicaux", salary: [28, 36] },
-  { title: "Aide-soignant(e)", rome: "J1501", romeLabel: "Soins d'hygiène, de confort du patient", salary: [22, 27] },
-  { title: "Serveur / Serveuse de restaurant", rome: "G1803", romeLabel: "Service en restauration", salary: [21, 26] },
-  { title: "Cuisinier(ère)", rome: "G1602", romeLabel: "Personnel de cuisine", salary: [23, 30] },
-  { title: "Préparateur de commandes", rome: "N1103", romeLabel: "Magasinage et préparation de commandes", salary: [21, 25] },
-  { title: "Chauffeur poids lourd", rome: "N4101", romeLabel: "Conduite de transport de marchandises", salary: [25, 32] },
-  { title: "Électricien du bâtiment", rome: "F1602", romeLabel: "Électricité bâtiment", salary: [24, 34] },
-  { title: "Maçon", rome: "F1703", romeLabel: "Maçonnerie", salary: [23, 32] },
-  { title: "Conseiller clientèle bancaire", rome: "C1206", romeLabel: "Gestion de clientèle bancaire", salary: [30, 40] },
-  { title: "Chargé(e) de recrutement", rome: "M1502", romeLabel: "Développement des ressources humaines", salary: [30, 40] },
+  { title: "Administrateur systèmes et réseaux", rome: "M1801", romeLabel: "Administration de systèmes d'information", salary: [32, 48], skills: ["Administrer un parc de serveurs", "Configurer un réseau LAN/WAN", "Superviser la disponibilité des services", "Rédiger une documentation technique"] },
+  { title: "Ingénieur DevOps", rome: "M1805", romeLabel: "Études et développement informatique", salary: [42, 62], skills: ["Automatiser des déploiements (CI/CD)", "Administrer des conteneurs Docker/Kubernetes", "Scripter en Python ou Bash", "Industrialiser la supervision"] },
+  { title: "Développeur Full Stack", rome: "M1805", romeLabel: "Études et développement informatique", salary: [36, 55], skills: ["Développer en JavaScript/TypeScript", "Concevoir des API REST", "Manipuler des bases de données SQL", "Versionner du code avec Git"] },
+  { title: "Technicien support informatique", rome: "I1401", romeLabel: "Maintenance informatique et bureautique", salary: [24, 32], skills: ["Diagnostiquer une panne matérielle", "Installer et configurer un poste de travail", "Assister les utilisateurs à distance", "Gérer un parc informatique"] },
+  { title: "Data analyst", rome: "M1403", romeLabel: "Études et prospectives socio-économiques", salary: [38, 52], skills: ["Analyser des données avec SQL", "Produire des tableaux de bord", "Réaliser des statistiques descriptives", "Présenter des résultats à un comité"] },
+  { title: "Chef de projet SI", rome: "M1806", romeLabel: "Conseil et maîtrise d'ouvrage en SI", salary: [45, 65], skills: ["Piloter un planning projet", "Rédiger des cahiers des charges", "Animer des ateliers utilisateurs", "Suivre un budget projet"] },
+  { title: "Comptable général", rome: "M1203", romeLabel: "Comptabilité", salary: [30, 42], skills: ["Tenir la comptabilité générale", "Réaliser les déclarations de TVA", "Rapprocher les comptes bancaires", "Préparer la clôture annuelle"] },
+  { title: "Assistant(e) commercial(e)", rome: "D1401", romeLabel: "Assistanat commercial", salary: [24, 30], skills: ["Gérer un portefeuille clients", "Rédiger des devis et des factures", "Utiliser un outil CRM", "Assurer le suivi des commandes"] },
+  { title: "Conducteur de ligne de production", rome: "H2701", romeLabel: "Pilotage d'installation énergétique", salary: [26, 34], skills: ["Piloter une ligne de production", "Respecter les standards qualité", "Réaliser la maintenance de premier niveau", "Consigner les incidents de production"] },
+  { title: "Technicien de maintenance industrielle", rome: "I1304", romeLabel: "Installation et maintenance d'équipements industriels", salary: [28, 38], skills: ["Diagnostiquer un dysfonctionnement électrique", "Réaliser la maintenance préventive", "Lire des schémas techniques", "Intervenir en sécurité sur machine"] },
+  { title: "Infirmier(ère) diplômé(e) d'État", rome: "J1502", romeLabel: "Coordination de services médicaux", salary: [28, 36], skills: ["Soigner et surveiller les patients", "Administrer les traitements prescrits", "Accueillir et informer les familles", "Tenir le dossier de soins informatisé"] },
+  { title: "Aide-soignant(e)", rome: "J1501", romeLabel: "Soins d'hygiène, de confort du patient", salary: [22, 27], skills: ["Accompagner les patients au quotidien", "Aider aux soins d'hygiène", "Observer et transmettre les constantes", "Entretenir les chambres des patients"] },
+  { title: "Serveur / Serveuse de restaurant", rome: "G1803", romeLabel: "Service en restauration", salary: [21, 26], skills: ["Prendre la commande des clients", "Servir les plats à table", "Encaisser les additions", "Entretenir la salle et le dressage"] },
+  { title: "Cuisinier(ère)", rome: "G1602", romeLabel: "Personnel de cuisine", salary: [23, 30], skills: ["Préparer les plats selon la fiche technique", "Respecter les normes d'hygiène HACCP", "Gérer les stocks de denrées", "Organiser le poste de travail"] },
+  { title: "Préparateur de commandes", rome: "N1103", romeLabel: "Magasinage et préparation de commandes", salary: [21, 25], skills: ["Préparer les commandes au picking", "Utiliser un scanner de code-barres", "Emballer et étiqueter les produits", "Ranger les zones de stockage"] },
+  { title: "Chauffeur poids lourd", rome: "N4101", romeLabel: "Conduite de transport de marchandises", salary: [25, 32], skills: ["Conduire un ensemble routier", "Sécuriser le chargement", "Contrôler le véhicule avant le départ", "Remplir le dossier de transport"] },
+  { title: "Électricien du bâtiment", rome: "F1602", romeLabel: "Électricité bâtiment", salary: [24, 34], skills: ["Réaliser des installations électriques", "Lire des plans électriques", "Poser des tableaux et équipements", "Appliquer la norme NF C 15-100"] },
+  { title: "Maçon", rome: "F1703", romeLabel: "Maçonnerie", salary: [23, 32], skills: ["Monter des murs en blocs ou en briques", "Coulage des fondations", "Réaliser des enduits", "Lire un plan de construction"] },
+  { title: "Conseiller clientèle bancaire", rome: "C1206", romeLabel: "Gestion de clientèle bancaire", salary: [30, 40], skills: ["Conseiller les clients sur les produits bancaires", "Gérer un portefeuille de comptes", "Détecter les risques de fraude", "Développer le portefeuille commercial"] },
+  { title: "Chargé(e) de recrutement", rome: "M1502", romeLabel: "Développement des ressources humaines", salary: [30, 40], skills: ["Sourcer des candidats", "Mener des entretiens de recrutement", "Rédiger des offres d'emploi", "Accueillir et intégrer les nouveaux collaborateurs"] },
 ];
 
 const COMPANIES = [
@@ -226,6 +227,9 @@ export function buildDemoOffers(count = 900): RawOffer[] {
           : `Annuel de ${low}000,00 € à ${high}000,00 €`,
       },
       dureeTravailLibelle: rand() > 0.25 ? "35H Travail en journée" : "Temps partiel - 24H",
+      competences: role.skills
+        .slice(0, 1 + Math.floor(rand() * role.skills.length))
+        .map((libelle, i) => ({ libelle, exigence: i < 2 ? "E" : "S" })),
       nombrePostes: 1 + Math.floor(rand() * 3),
       origineOffre: {
         origine: rand() > 0.75 ? "2" : "1",
